@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник долгов</title>
+    <style>
+        /* ---------- CSS-переменные: светлая тема (по умолчанию) ---------- */
+        :root {
+            --bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-strong: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-soft: #eef2f6;
+            --header-bg: #ffffff;
+            --th-bg: #f8fafc;
+            --debt-bg: #fef2f2;
+            --debt-text: #991b1b;
+            --empty-text: #94a3b8;
+            --input-bg: #ffffff;
+            --hover: #f1f5f9;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --success: #10b981;
+            --success-hover: #059669;
+            --role-bg: #e2e8f0;
+            --role-text: #334155;
+            --shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.1), 0 8px 12px -6px rgba(0, 0, 0, 0.05);
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* ---------- Тёмная тема ---------- */
+        body.dark {
+            --bg: #0b1220;
+            --card-bg: #1e293b;
+            --text: #e2e8f0;
+            --text-strong: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --border-soft: #334155;
+            --header-bg: #1e293b;
+            --th-bg: #273449;
+            --debt-bg: #4c1d1d;
+            --debt-text: #fca5a5;
+            --empty-text: #64748b;
+            --input-bg: #0f172a;
+            --hover: #334155;
+            --role-bg: #334155;
+            --role-text: #cbd5e1;
+            --shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5), 0 8px 12px -6px rgba(0, 0, 0, 0.3);
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ---------- Сброс и базовые стили ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: background 0.2s, color 0.2s;
+            overflow-x: hidden;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        #loginScreen .card {
+            max-width: 420px;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            color: var(--text-strong);
+        }
+
+        .subhead {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: var(--text);
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: border 0.15s, box-shadow 0.15s, background 0.2s;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        button {
+            border: none;
+            border-radius: 40px;
+            padding: 0.85rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.05s, box-shadow 0.15s, color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: 1.5px solid var(--primary);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+            border-color: var(--danger-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+            border-color: var(--success-hover);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: transparent;
+            color: var(--text-muted);
+        }
+
+        .btn-ghost:hover {
+            background: var(--hover);
+            color: var(--text-strong);
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            min-height: 1.3rem;
+        }
+
+        /* ---------- Основной экран ---------- */
+        #mainScreen {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: var(--header-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            box-shadow: var(--shadow-soft);
+            transition: background 0.2s;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-strong);
+        }
+
+        .role-tag {
+            background: var(--role-bg);
+            color: var(--role-text);
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-wrapper {
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            border: 1px solid var(--border-soft);
+            transition: background 0.2s;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 600px;
+            font-size: 0.95rem;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 0.9rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-soft);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--th-bg);
+            font-weight: 600;
+            color: var(--text-strong);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border-bottom: 1.5px solid var(--border);
+            position: relative;
+        }
+
+        td {
+            color: var(--text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td.debt-cell {
+            background: var(--debt-bg);
+            color: var(--debt-text);
+            font-weight: 500;
+        }
+
+        td.empty-cell {
+            color: var(--empty-text);
+            background: transparent;
+        }
+
+        .edit-input {
+            width: 100%;
+            min-width: 120px;
+            padding: 0.4rem 0.6rem;
+            border: 1.5px solid var(--primary);
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: var(--input-bg);
+            color: var(--text);
+        }
+
+        .cell-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            padding: 0.3rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: var(--hover);
+            color: var(--text-strong);
+        }
+
+        /* ---------- Модальные окна ---------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.15s;
+        }
+
+        .modal-overlay.hidden {
+            display: none !important;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-strong);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+        }
+
+        /* ---------- Тосты ---------- */
+        #toastContainer {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 2000;
+            align-items: flex-end;
+            max-width: 380px;
+        }
+
+        .toast {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 0.8rem 1.4rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.25s ease;
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast span.toast-text {
+            white-space: normal;
+        }
+
+        .toast button.toast-action {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            padding: 0.35rem 0.9rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .toast button.toast-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================
+           ПАСХАЛКА: "ОТЧИСЛЕН" + ЛЕПЕСТКИ САКУРЫ
+           ============================================================ */
+        #easterEggOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 40%, rgba(255, 182, 193, 0.25), rgba(15, 23, 42, 0.55) 80%);
+            backdrop-filter: blur(2px);
+            display: none;
+        }
+
+        #easterEggOverlay.active {
+            display: block;
+            animation: eggFadeIn 0.6s ease;
+        }
+
+        @keyframes eggFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .expelled-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(3rem, 16vw, 12rem);
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #fff;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+            text-shadow:
+                0 0 20px rgba(255, 105, 180, 0.9),
+                0 0 60px rgba(255, 105, 180, 0.7),
+                0 0 120px rgba(255, 20, 147, 0.5),
+                0 8px 30px rgba(0, 0, 0, 0.4);
+            animation: expelledPulse 1.6s ease-in-out infinite alternate,
+                       expelledShake 0.25s ease-in-out infinite;
+            user-select: none;
+            z-index: 2;
+        }
+
+        @keyframes expelledPulse {
+            from {
+                transform: translate(-50%, -50%) scale(1);
+                text-shadow:
+                    0 0 20px rgba(255, 105, 180, 0.9),
+                    0 0 60px rgba(255, 105, 180, 0.7),
+                    0 0 120px rgba(255, 20, 147, 0.5),
+                    0 8px 30px rgba(0, 0, 0, 0.4);
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1.06);
+                text-shadow:
+                    0 0 30px rgba(255, 105, 180, 1),
+                    0 0 90px rgba(255, 105, 180, 0.9),
+                    0 0 180px rgba(255, 20, 147, 0.7),
+                    0 10px 40px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        @keyframes expelledShake {
+            0%, 100% { margin-left: 0; }
+            25% { margin-left: -3px; }
+            75% { margin-left: 3px; }
+        }
+
+        .sakura-petal {
+            position: absolute;
+            top: -40px;
+            width: 18px;
+            height: 18px;
+            background: radial-gradient(circle at 30% 30%, #ffe0ec, #ffb6d5 60%, #ff8fbf);
+            border-radius: 100% 0 100% 0;
+            opacity: 0.9;
+            box-shadow: 0 0 6px rgba(255, 182, 213, 0.6);
+            will-change: transform, top, left;
+            animation-name: petalFall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes petalFall {
+            0% {
+                top: -5vh;
+                transform: translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.95;
+            }
+            100% {
+                top: 105vh;
+                transform: translateX(120px) rotate(720deg);
+                opacity: 0.7;
+            }
+        }
+
+        .egg-return-btn {
+            position: absolute;
+            bottom: 2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: auto;
+            padding: 0.9rem 2.2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            background: rgba(15, 23, 42, 0.55);
+            color: #fff;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s, transform 0.1s, border-color 0.2s;
+            z-index: 3;
+        }
+
+        .egg-return-btn:hover {
+            background: rgba(255, 105, 180, 0.5);
+            border-color: #fff;
+        }
+
+        .egg-return-btn:active {
+            transform: translateX(-50%) scale(0.97);
+        }
+
+        /* ============================================================
+           ЕЛЕ ВИДИМАЯ КНОПКА «РЕЖИМ ЯРОСТИ»
+           ============================================================ */
+        #rageModeBtn {
+            position: fixed;
+            bottom: 6px;
+            right: 12px;
+            z-index: 500;
+            padding: 4px 10px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            border-radius: 30px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text);
+            opacity: 0.06;
+            cursor: pointer;
+            transition: opacity 0.3s, background 0.2s, color 0.2s, border-color 0.2s;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        #rageModeBtn:hover {
+            opacity: 0.35;
+            background: rgba(239, 68, 68, 0.12);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        #rageModeBtn.active {
+            opacity: 0.25;
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        #rageModeBtn.active:hover {
+            opacity: 0.7;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* ---------- Адаптив ---------- */
+        @media (max-width: 640px) {
+            .app-header {
+                border-radius: 24px;
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.7rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .toast {
+                max-width: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== ЭКРАН ВХОДА ========== -->
+<div id="loginScreen">
+    <div class="card">
+        <h1>Дневник долгов</h1>
+        <p class="subhead">Войдите, чтобы продолжить</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginInput">Логин</label>
+                <input type="text" id="loginInput" placeholder="Введите логин" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label for="passwordInput">Пароль</label>
+                <input type="password" id="passwordInput" placeholder="Введите пароль" autocomplete="current-password" required>
+            </div>
+            <div id="loginError" class="error-msg"></div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Войти</button>
+        </form>
+    </div>
+</div>
+
+<!-- ========== ОСНОВНОЙ ЭКРАН ========== -->
+<div id="mainScreen" class="hidden">
+    <div class="app-header">
+        <div class="user-badge">
+            <span class="user-name" id="headerUserName">—</span>
+            <span class="role-tag" id="headerUserRole">—</span>
+        </div>
+        <div class="header-right">
+            <button id="restoreStudentBtn" class="btn-success btn-sm hidden" title="Вернуть последнего удалённого ученика">↩️ Вернуть ученика</button>
+            <button id="themeToggle" class="btn-ghost btn-sm" title="Переключить тему">🌙 Тема</button>
+            <button id="logoutBtn" class="btn-ghost btn-sm">Выйти</button>
+        </div>
+    </div>
+
+    <div class="toolbar" id="adminToolbar">
+        <button id="addStudentBtn" class="btn-primary btn-sm">➕ Добавить ученика</button>
+        <button id="addSubjectBtn" class="btn-primary btn-sm">📚 Добавить предмет</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="debtTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ УЧЕНИКА ========== -->
+<div id="studentModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>Новый ученик</h2>
+        <form id="studentForm">
+            <div class="form-group">
+                <label>ФИО</label>
+                <input type="text" id="studentName" placeholder="Иванов Иван Иванович" required>
+            </div>
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="studentLogin" placeholder="ivanov2" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="text" id="studentPassword" placeholder="1234" required>
+            </div>
+            <div id="studentFormError" class="error-msg"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="cancelStudentBtn">Отмена</button>
+                <button type="submit" class="btn-primary">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ПРЕДМЕТА ========== -->
+<div id="subjectModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>Новый предмет</h2>
+        <form id="subjectForm">
+            <div class="form-group">
+                <label>Название предмета</label>
+                <input type="text" id="subjectName" placeholder="Например: Математика" required>
+            </div>
+            <div id="subjectFormError" class="error-msg"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="cancelSubjectBtn">Отмена</button>
+                <button type="submit" class="btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ ========== -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2 id="confirmTitle">Подтверждение</h2>
+        <p id="confirmMessage" style="color: var(--text-muted); margin-bottom: 0.5rem;">Вы уверены?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="cancelConfirmBtn">Отмена</button>
+            <button type="button" class="btn-danger" id="confirmDeleteBtn">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== ТОСТЫ ========== -->
+<div id="toastContainer"></div>
+
+<!-- ========== ПАСХАЛКА: ОТЧИСЛЕН + САКУРА ========== -->
+<div id="easterEggOverlay">
+    <div class="expelled-text">ОТЧИСЛЕН</div>
+    <button class="egg-return-btn" id="eggReturnBtn">Вернуться к входу</button>
+</div>
+
+<!-- ========== ЕЛЕ ВИДИМАЯ КНОПКА «РЕЖИМ ЯРОСТИ» ========== -->
+<button id="rageModeBtn" title="Не нажимай...">режим ярости</button>
+
+<script>
+    // ============================================================
+    //  ДНЕВНИК ДОЛГОВ — Vanilla JS
+    // ============================================================
+
+    // ---------- Ключи localStorage ----------
+    const LS_KEYS = {
+        USERS: 'debt_users',
+        SUBJECTS: 'debt_subjects',
+        DATA: 'debt_data',
+        SESSION: 'debt_session',
+        THEME: 'debt_theme',
+        RAGE_BACKUP: 'debt_rage_backup',
+        RAGE_FLAG: 'debt_rage_active'
+    };
+
+    // ---------- Секретные данные пасхалки ----------
+    const EASTER_EGG = {
+        login: 'korobkov',
+        password: '6767'
+    };
+
+    // ---------- Значение для «режима ярости» ----------
+    const RAGE_VALUE = '2 (нельзя исправить)';
+
+    // ---------- Демо-данные (расширенный список) ----------
+    const DEFAULT_USERS = [
+        { id: 'u1', login: 'admin', password: 'admin123', role: 'admin', name: 'Администратор' },
+        // Ученики (14 человек)
+        { id: 'u2', login: 'ivanov', password: '1234', role: 'student', name: 'Иванов Иван Иванович' },
+        { id: 'u3', login: 'petrov', password: '1234', role: 'student', name: 'Петров Пётр Петрович' },
+        { id: 'u4', login: 'sidorova', password: '1234', role: 'student', name: 'Сидорова Анна Сергеевна' },
+        { id: 'u5', login: 'kuznetsov', password: '1234', role: 'student', name: 'Кузнецов Дмитрий Олегович' },
+        { id: 'u6', login: 'smirnova', password: '1234', role: 'student', name: 'Смирнова Ольга Викторовна' },
+        { id: 'u7', login: 'volkov', password: '1234', role: 'student', name: 'Волков Сергей Андреевич' },
+        { id: 'u8', login: 'morozova', password: '1234', role: 'student', name: 'Морозова Екатерина Дмитриевна' },
+        { id: 'u9', login: 'novikov', password: '1234', role: 'student', name: 'Новиков Алексей Михайлович' },
+        { id: 'u10', login: 'fedorova', password: '1234', role: 'student', name: 'Фёдорова Мария Игоревна' },
+        { id: 'u11', login: 'sokolov', password: '1234', role: 'student', name: 'Соколов Никита Владимирович' },
+        { id: 'u12', login: 'pavlova', password: '1234', role: 'student', name: 'Павлова Дарья Алексеевна' },
+        { id: 'u13', login: 'orlov', password: '1234', role: 'student', name: 'Орлов Артём Сергеевич' },
+        { id: 'u14', login: 'zaitseva', password: '1234', role: 'student', name: 'Зайцева Полина Олеговна' },
+        { id: 'u15', login: 'lebedev', password: '1234', role: 'student', name: 'Лебедев Максим Денисович' }
+    ];
+
+    const DEFAULT_SUBJECTS = [
+        { id: 's1', name: 'Математика' },
+        { id: 's2', name: 'Физика' },
+        { id: 's3', name: 'Информатика' },
+        { id: 's4', name: 'История' }
+    ];
+
+    // Долги: у большинства учеников есть 1–3 долга, у некоторых — пусто
+    const DEFAULT_DATA = {
+        'u2': { 's1': '2 курс 2 семестр', 's3': '1 курс 1 семестр' },
+        'u3': { 's2': '3 курс 1 семестр', 's4': '2 курс 2 семестр' },
+        'u4': { 's1': '1 курс 1 семестр' },
+        'u5': { 's2': '2 курс 2 семестр', 's3': '3 курс 1 семестр', 's4': '1 курс 2 семестр' },
+        'u6': { 's1': '2 курс 1 семестр', 's4': '1 курс 1 семестр' },
+        'u7': { 's2': '1 курс 2 семестр' },
+        'u8': { 's3': '2 курс 2 семестр', 's4': '3 курс 1 семестр' },
+        'u9': {}, // без долгов
+        'u10': { 's1': '3 курс 1 семестр', 's2': '1 курс 1 семестр' },
+        'u11': { 's3': '2 курс 1 семестр' },
+        'u12': { 's1': '1 курс 2 семестр', 's3': '2 курс 2 семестр' },
+        'u13': {}, // без долгов
+        'u14': { 's2': '2 курс 1 семестр', 's4': '1 курс 2 семестр' },
+        'u15': { 's1': '3 курс 2 семестр', 's2': '2 курс 2 семестр', 's3': '1 курс 1 семестр' }
+    };
+
+    // ---------- Хранилище ----------
+    let users = [];
+    let subjects = [];
+    let debtData = {};
+    let currentUser = null;
+    let petalInterval = null;
+
+    // ---------- Буфер последнего удалённого ученика ----------
+    let lastDeletedStudent = null;
+    let restoreTimeout = null;
+
+    // ---------- Состояние «режима ярости» ----------
+    let rageModeActive = false;
+
+    // ---------- Вспомогательные функции ----------
+    function loadFromLS(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.warn('Ошибка чтения localStorage', e);
+        }
+        return fallback;
+    }
+
+    function saveToLS(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.warn('Ошибка записи в localStorage', e);
+        }
+    }
+
+    function genId(prefix = 'id') {
+        return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // ---------- Toast ----------
+    function showToast(message, actionLabel, actionCallback, duration = 6000) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+
+        const text = document.createElement('span');
+        text.className = 'toast-text';
+        text.textContent = message;
+        toast.appendChild(text);
+
+        if (actionLabel && actionCallback) {
+            const btn = document.createElement('button');
+            btn.className = 'toast-action';
+            btn.textContent = actionLabel;
+            btn.addEventListener('click', () => {
+                actionCallback();
+                closeToast(toast);
+            });
+            toast.appendChild(btn);
+        }
+
+        container.appendChild(toast);
+
+        const timer = setTimeout(() => closeToast(toast), duration);
+        toast._timer = timer;
+
+        function closeToast(el) {
+            if (el._closed) return;
+            el._closed = true;
+            if (el._timer) clearTimeout(el._timer);
+            el.style.opacity = '0';
+            el.style.transition = 'opacity 0.2s';
+            setTimeout(() => el.remove(), 250);
+        }
+    }
+
+    // ============================================================
+    //  ТЕМА
+    // ============================================================
+    function applyTheme(isDark) {
+        document.body.classList.toggle('dark', isDark);
+        localStorage.setItem(LS_KEYS.THEME, isDark ? 'dark' : 'light');
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.textContent = isDark ? '☀️ Тема' : '🌙 Тема';
+            btn.title = isDark ? 'Переключить на светлую тему' : 'Переключить на тёмную тему';
+        }
+    }
+
+    function initTheme() {
+        const saved = localStorage.getItem(LS_KEYS.THEME);
+        let isDark;
+        if (saved === 'dark') isDark = true;
+        else if (saved === 'light') isDark = false;
+        else isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        applyTheme(isDark);
+    }
+
+    // ============================================================
+    //  ПАСХАЛКА
+    // ============================================================
+    function createPetal() {
+        const overlay = document.getElementById('easterEggOverlay');
+        if (!overlay) return;
+
+        const petal = document.createElement('div');
+        petal.className = 'sakura-petal';
+
+        const startLeft = Math.random() * 100;
+        petal.style.left = startLeft + 'vw';
+
+        const size = 12 + Math.random() * 16;
+        petal.style.width = size + 'px';
+        petal.style.height = size + 'px';
+
+        const duration = 5 + Math.random() * 7;
+        petal.style.animationDuration = duration + 's';
+        petal.style.animationDelay = (Math.random() * 2) + 's';
+
+        const hue = 330 + Math.random() * 30;
+        petal.style.background = `radial-gradient(circle at 30% 30%, #ffe0ec, hsl(${hue}, 100%, 80%) 60%, hsl(${hue}, 100%, 70%))`;
+
+        overlay.appendChild(petal);
+
+        setTimeout(() => {
+            if (petal.parentNode) petal.remove();
+        }, (duration + 3) * 1000);
+    }
+
+    function startPetalRain() {
+        stopPetalRain();
+        for (let i = 0; i < 40; i++) {
+            setTimeout(createPetal, i * 120);
+        }
+        petalInterval = setInterval(createPetal, 350);
+    }
+
+    function stopPetalRain() {
+        if (petalInterval) {
+            clearInterval(petalInterval);
+            petalInterval = null;
+        }
+        const overlay = document.getElementById('easterEggOverlay');
+        if (overlay) {
+            overlay.querySelectorAll('.sakura-petal').forEach(p => p.remove());
+        }
+    }
+
+    function showEasterEgg() {
+        const overlay = document.getElementById('easterEggOverlay');
+        overlay.classList.add('active');
+        startPetalRain();
+    }
+
+    function hideEasterEgg() {
+        const overlay = document.getElementById('easterEggOverlay');
+        overlay.classList.remove('active');
+        stopPetalRain();
+        showLoginScreen();
+        loginInput.value = '';
+        passwordInput.value = '';
+        loginError.textContent = '';
+    }
+
+    // ============================================================
+    //  РЕЖИМ ЯРОСТИ
+    // ============================================================
+
+    function activateRageMode() {
+        const backup = JSON.parse(JSON.stringify(debtData));
+        saveToLS(LS_KEYS.RAGE_BACKUP, backup);
+        saveToLS(LS_KEYS.RAGE_FLAG, true);
+
+        const tempData = {};
+        users.filter(u => u.role === 'student').forEach(user => {
+            tempData[user.id] = {};
+            subjects.forEach(subject => {
+                tempData[user.id][subject.id] = RAGE_VALUE;
+            });
+        });
+        debtData = tempData;
+        saveData();
+
+        rageModeActive = true;
+        updateRageButtonUI();
+
+        renderTable();
+        showToast('💢 РЕЖИМ ЯРОСТИ АКТИВИРОВАН. Исправить нельзя.');
+    }
+
+    function deactivateRageMode() {
+        const backup = loadFromLS(LS_KEYS.RAGE_BACKUP, null);
+        if (backup !== null) {
+            debtData = backup;
+            saveData();
+        }
+        localStorage.removeItem(LS_KEYS.RAGE_BACKUP);
+        localStorage.removeItem(LS_KEYS.RAGE_FLAG);
+
+        rageModeActive = false;
+        updateRageButtonUI();
+
+        renderTable();
+        showToast('✅ Состояние восстановлено. Режим ярости отключён.');
+    }
+
+    function toggleRageMode() {
+        if (rageModeActive) {
+            deactivateRageMode();
+        } else {
+            activateRageMode();
+        }
+    }
+
+    function updateRageButtonUI() {
+        const btn = document.getElementById('rageModeBtn');
+        if (!btn) return;
+        if (rageModeActive) {
+            btn.classList.add('active');
+            btn.textContent = 'режим ярости ВКЛ';
+            btn.title = 'Отключить режим ярости и вернуть исходные значения';
+        } else {
+            btn.classList.remove('active');
+            btn.textContent = 'режим ярости';
+            btn.title = 'Не нажимай...';
+        }
+    }
+
+    function restoreRageStateFromStorage() {
+        const flag = loadFromLS(LS_KEYS.RAGE_FLAG, false);
+        const backup = loadFromLS(LS_KEYS.RAGE_BACKUP, null);
+
+        if (flag && backup !== null) {
+            const tempData = {};
+            users.filter(u => u.role === 'student').forEach(user => {
+                tempData[user.id] = {};
+                subjects.forEach(subject => {
+                    tempData[user.id][subject.id] = RAGE_VALUE;
+                });
+            });
+            debtData = tempData;
+            saveData();
+
+            rageModeActive = true;
+        } else {
+            localStorage.removeItem(LS_KEYS.RAGE_FLAG);
+            localStorage.removeItem(LS_KEYS.RAGE_BACKUP);
+            rageModeActive = false;
+        }
+        updateRageButtonUI();
+    }
+
+    // ============================================================
+    //  ИНИЦИАЛИЗАЦИЯ ДАННЫХ
+    // ============================================================
+    function initStorage() {
+        if (!localStorage.getItem(LS_KEYS.USERS)) {
+            saveToLS(LS_KEYS.USERS, DEFAULT_USERS);
+        }
+        users = loadFromLS(LS_KEYS.USERS, DEFAULT_USERS);
+
+        if (!localStorage.getItem(LS_KEYS.SUBJECTS)) {
+            saveToLS(LS_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+        }
+        subjects = loadFromLS(LS_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+
+        if (!localStorage.getItem(LS_KEYS.DATA)) {
+            saveToLS(LS_KEYS.DATA, DEFAULT_DATA);
+        }
+        debtData = loadFromLS(LS_KEYS.DATA, DEFAULT_DATA);
+
+        const sessionRaw = localStorage.getItem(LS_KEYS.SESSION);
+        if (sessionRaw) {
+            try {
+                const session = JSON.parse(sessionRaw);
+                if (session && session.userId) {
+                    const user = users.find(u => u.id === session.userId);
+                    if (user) currentUser = user;
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        restoreRageStateFromStorage();
+    }
+
+    function saveUsers() { saveToLS(LS_KEYS.USERS, users); }
+    function saveSubjects() { saveToLS(LS_KEYS.SUBJECTS, subjects); }
+    function saveData() { saveToLS(LS_KEYS.DATA, debtData); }
+
+    function saveSession(user) {
+        if (user) {
+            saveToLS(LS_KEYS.SESSION, { userId: user.id });
+        } else {
+            localStorage.removeItem(LS_KEYS.SESSION);
+        }
+    }
+
+    // ---------- Показать/скрыть экраны ----------
+    function showLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainScreen').classList.add('hidden');
+    }
+
+    function showMainScreen() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainScreen').classList.remove('hidden');
+        document.getElementById('headerUserName').textContent = currentUser.name || currentUser.login;
+        document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Администратор' : 'Ученик';
+        const toolbar = document.getElementById('adminToolbar');
+        if (currentUser.role === 'admin') {
+            toolbar.classList.remove('hidden');
+        } else {
+            toolbar.classList.add('hidden');
+        }
+        updateRestoreButton();
+        updateRageButtonUI();
+        renderTable();
+    }
+
+    function logout() {
+        currentUser = null;
+        saveSession(null);
+        showLoginScreen();
+        document.getElementById('loginInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('loginError').textContent = '';
+        showToast('Вы вышли из системы');
+    }
+
+    // ============================================================
+    //  БУФЕР ВОССТАНОВЛЕНИЯ УЧЕНИКА
+    // ============================================================
+
+    function updateRestoreButton() {
+        const btn = document.getElementById('restoreStudentBtn');
+        if (!btn) return;
+        const isAdmin = currentUser && currentUser.role === 'admin';
+        if (isAdmin && lastDeletedStudent) {
+            btn.classList.remove('hidden');
+            btn.title = `Вернуть «${lastDeletedStudent.user.name}»`;
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+
+    function stashDeletedStudent(user, debts) {
+        lastDeletedStudent = {
+            user: JSON.parse(JSON.stringify(user)),
+            debts: debts ? JSON.parse(JSON.stringify(debts)) : {}
+        };
+
+        if (restoreTimeout) clearTimeout(restoreTimeout);
+        restoreTimeout = setTimeout(() => {
+            lastDeletedStudent = null;
+            updateRestoreButton();
+        }, 60000);
+
+        updateRestoreButton();
+    }
+
+    function restoreLastStudent() {
+        if (!lastDeletedStudent) {
+            showToast('Нет удалённого ученика для восстановления');
+            return;
+        }
+
+        const { user, debts } = lastDeletedStudent;
+
+        const loginTaken = users.some(u => u.login.toLowerCase() === user.login.toLowerCase());
+        if (loginTaken) {
+            let attempt = 1;
+            let newLogin = user.login + '_restored';
+            while (users.some(u => u.login.toLowerCase() === newLogin.toLowerCase())) {
+                newLogin = user.login + '_restored' + (++attempt);
+            }
+            user.login = newLogin;
+            showToast(`Логин был занят, назначен «${newLogin}»`, null, null, 5000);
+        }
+
+        users.push(user);
+        saveUsers();
+
+        if (debts && Object.keys(debts).length > 0) {
+            debtData[user.id] = debts;
+        } else {
+            debtData[user.id] = {};
+        }
+        saveData();
+
+        lastDeletedStudent = null;
+        if (restoreTimeout) {
+            clearTimeout(restoreTimeout);
+            restoreTimeout = null;
+        }
+        updateRestoreButton();
+
+        showToast(`Ученик «${user.name}» восстановлен`);
+        renderTable();
+    }
+
+    // ============================================================
+    //  РЕНДЕРИНГ ТАБЛИЦЫ
+    // ============================================================
+
+    function renderTable() {
+        if (!currentUser) return;
+
+        const thead = document.getElementById('tableHead');
+        const tbody = document.getElementById('tableBody');
+        const isAdmin = currentUser.role === 'admin';
+
+        thead.innerHTML = '';
+        const headRow = document.createElement('tr');
+
+        const thStudent = document.createElement('th');
+        thStudent.textContent = 'Ученик';
+        thStudent.style.minWidth = '180px';
+        headRow.appendChild(thStudent);
+
+        subjects.forEach(subject => {
+            const th = document.createElement('th');
+            th.style.minWidth = '150px';
+
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'space-between';
+            container.style.gap = '0.5rem';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = subject.name;
+            container.appendChild(nameSpan);
+
+            if (isAdmin) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon-btn';
+                delBtn.innerHTML = '✕';
+                delBtn.title = 'Удалить предмет';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    askDeleteSubject(subject.id, subject.name);
+                });
+                container.appendChild(delBtn);
+            }
+
+            th.appendChild(container);
+            headRow.appendChild(th);
+        });
+
+        if (isAdmin) {
+            const thActions = document.createElement('th');
+            thActions.textContent = '⚙️';
+            thActions.style.minWidth = '60px';
+            thActions.style.textAlign = 'center';
+            headRow.appendChild(thActions);
+        }
+
+        thead.appendChild(headRow);
+
+        tbody.innerHTML = '';
+
+        let visibleUsers = users.filter(u => u.role === 'student');
+        if (!isAdmin) {
+            visibleUsers = visibleUsers.filter(u => u.id === currentUser.id);
+        }
+
+        if (visibleUsers.length === 0) {
+            const emptyRow = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = subjects.length + 1 + (isAdmin ? 1 : 0);
+            td.textContent = 'Нет учеников для отображения';
+            td.style.textAlign = 'center';
+            td.style.color = 'var(--empty-text)';
+            emptyRow.appendChild(td);
+            tbody.appendChild(emptyRow);
+        }
+
+        visibleUsers.forEach(user => {
+            const row = document.createElement('tr');
+
+            const nameTd = document.createElement('td');
+            nameTd.textContent = user.name;
+            nameTd.style.fontWeight = '500';
+            row.appendChild(nameTd);
+
+            subjects.forEach(subject => {
+                const td = document.createElement('td');
+                const value = (debtData[user.id] && debtData[user.id][subject.id]) || '';
+
+                if (isAdmin) {
+                    if (!rageModeActive) {
+                        td.style.cursor = 'pointer';
+                        td.title = 'Двойной клик для редактирования';
+                    } else {
+                        td.title = 'Режим ярости: нельзя исправить';
+                        td.style.cursor = 'not-allowed';
+                    }
+
+                    const span = document.createElement('span');
+                    span.textContent = value || '—';
+                    td.appendChild(span);
+
+                    if (value) {
+                        td.classList.add('debt-cell');
+                    } else {
+                        td.classList.add('empty-cell');
+                    }
+
+                    if (!rageModeActive) {
+                        td.addEventListener('dblclick', () => startInlineEdit(td, user.id, subject.id, value));
+                    }
+                    row.appendChild(td);
+                } else {
+                    td.textContent = value || '—';
+                    if (value) {
+                        td.classList.add('debt-cell');
+                    } else {
+                        td.classList.add('empty-cell');
+                    }
+                    row.appendChild(td);
+                }
+            });
+
+            if (isAdmin) {
+                const actionsTd = document.createElement('td');
+                actionsTd.style.textAlign = 'center';
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon-btn';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = 'Удалить ученика';
+                delBtn.addEventListener('click', () => askDeleteStudent(user.id, user.name));
+                actionsTd.appendChild(delBtn);
+
+                row.appendChild(actionsTd);
+            }
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // ---------- Inline-редактирование ячейки ----------
+    function startInlineEdit(td, studentId, subjectId, currentValue) {
+        if (rageModeActive) {
+            showToast('💢 Режим ярости: нельзя исправить');
+            return;
+        }
+        if (td.querySelector('input')) return;
+
+        const originalHTML = td.innerHTML;
+        td.innerHTML = '';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-input';
+        input.value = currentValue;
+        input.placeholder = 'Нет долга';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'icon-btn';
+        saveBtn.innerHTML = '✔️';
+        saveBtn.title = 'Сохранить';
+        saveBtn.style.marginLeft = '0.25rem';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'icon-btn';
+        cancelBtn.innerHTML = '✖️';
+        cancelBtn.title = 'Отмена';
+        cancelBtn.style.marginLeft = '0.1rem';
+
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.appendChild(input);
+        wrapper.appendChild(saveBtn);
+        wrapper.appendChild(cancelBtn);
+        td.appendChild(wrapper);
+
+        input.focus();
+        input.select();
+
+        function save() {
+            const newValue = input.value.trim();
+            if (!debtData[studentId]) debtData[studentId] = {};
+            if (newValue) {
+                debtData[studentId][subjectId] = newValue;
+            } else {
+                delete debtData[studentId][subjectId];
+                if (Object.keys(debtData[studentId]).length === 0) {
+                    delete debtData[studentId];
+                }
+            }
+            saveData();
+            renderTable();
+            showToast('Сохранено');
+        }
+
+        function cancel() {
+            td.innerHTML = originalHTML;
+            renderTable();
+        }
+
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            save();
+        });
+
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cancel();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                save();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancel();
+            }
+        });
+
+        const clickOutside = (e) => {
+            if (!td.contains(e.target)) {
+                cancel();
+                document.removeEventListener('click', clickOutside);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', clickOutside), 0);
+    }
+
+    // ============================================================
+    //  CRUD: УЧЕНИКИ
+    // ============================================================
+
+    function addStudent(name, login, password) {
+        if (!name.trim() || !login.trim() || !password.trim()) {
+            return { ok: false, error: 'Заполните все поля' };
+        }
+
+        if (users.some(u => u.login.toLowerCase() === login.trim().toLowerCase())) {
+            return { ok: false, error: 'Пользователь с таким логином уже существует' };
+        }
+
+        const newUser = {
+            id: genId('u'),
+            login: login.trim(),
+            password: password.trim(),
+            role: 'student',
+            name: name.trim()
+        };
+
+        users.push(newUser);
+        saveUsers();
+
+        if (!debtData[newUser.id]) {
+            debtData[newUser.id] = {};
+            saveData();
+        }
+
+        if (rageModeActive) {
+            subjects.forEach(s => {
+                debtData[newUser.id][s.id] = RAGE_VALUE;
+            });
+            saveData();
+        }
+
+        showToast('Ученик добавлен');
+        renderTable();
+        return { ok: true };
+    }
+
+    function deleteStudent(studentId) {
+        const user = users.find(u => u.id === studentId);
+        if (!user) return;
+
+        const userDebts = debtData[studentId] ? JSON.parse(JSON.stringify(debtData[studentId])) : {};
+        stashDeletedStudent(user, userDebts);
+
+        users = users.filter(u => u.id !== studentId);
+        saveUsers();
+
+        delete debtData[studentId];
+        saveData();
+
+        if (currentUser && currentUser.id === studentId) {
+            logout();
+        }
+
+        renderTable();
+
+        showToast(
+            `Ученик «${user.name}» удалён`,
+            'Отменить',
+            () => restoreLastStudent(),
+            7000
+        );
+    }
+
+    // ============================================================
+    //  CRUD: ПРЕДМЕТЫ
+    // ============================================================
+
+    function addSubject(name) {
+        if (!name.trim()) {
+            return { ok: false, error: 'Введите название предмета' };
+        }
+
+        if (subjects.some(s => s.name.toLowerCase() === name.trim().toLowerCase())) {
+            return { ok: false, error: 'Такой предмет уже существует' };
+        }
+
+        const newSubject = {
+            id: genId('s'),
+            name: name.trim()
+        };
+
+        subjects.push(newSubject);
+        saveSubjects();
+
+        if (rageModeActive) {
+            users.filter(u => u.role === 'student').forEach(user => {
+                if (!debtData[user.id]) debtData[user.id] = {};
+                debtData[user.id][newSubject.id] = RAGE_VALUE;
+            });
+            saveData();
+        }
+
+        showToast('Столбец добавлен');
+        renderTable();
+        return { ok: true };
+    }
+
+    function deleteSubject(subjectId, subjectName) {
+        subjects = subjects.filter(s => s.id !== subjectId);
+        saveSubjects();
+
+        for (const studentId in debtData) {
+            if (debtData[studentId] && debtData[studentId][subjectId]) {
+                delete debtData[studentId][subjectId];
+                if (Object.keys(debtData[studentId]).length === 0) {
+                    delete debtData[studentId];
+                }
+            }
+        }
+        saveData();
+
+        showToast(`Предмет «${subjectName}» удалён`);
+        renderTable();
+    }
+
+    // ============================================================
+    //  МОДАЛЬНЫЕ ОКНА И ПОДТВЕРЖДЕНИЯ
+    // ============================================================
+
+    const studentModal = document.getElementById('studentModal');
+    const studentForm = document.getElementById('studentForm');
+    const studentFormError = document.getElementById('studentFormError');
+
+    document.getElementById('addStudentBtn').addEventListener('click', () => {
+        studentForm.reset();
+        studentFormError.textContent = '';
+        studentModal.classList.remove('hidden');
+        document.getElementById('studentName').focus();
+    });
+
+    document.getElementById('cancelStudentBtn').addEventListener('click', () => {
+        studentModal.classList.add('hidden');
+    });
+
+    studentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('studentName').value;
+        const login = document.getElementById('studentLogin').value;
+        const password = document.getElementById('studentPassword').value;
+
+        const result = addStudent(name, login, password);
+        if (result.ok) {
+            studentModal.classList.add('hidden');
+        } else {
+            studentFormError.textContent = result.error;
+        }
+    });
+
+    const subjectModal = document.getElementById('subjectModal');
+    const subjectForm = document.getElementById('subjectForm');
+    const subjectFormError = document.getElementById('subjectFormError');
+
+    document.getElementById('addSubjectBtn').addEventListener('click', () => {
+        subjectForm.reset();
+        subjectFormError.textContent = '';
+        subjectModal.classList.remove('hidden');
+        document.getElementById('subjectName').focus();
+    });
+
+    document.getElementById('cancelSubjectBtn').addEventListener('click', () => {
+        subjectModal.classList.add('hidden');
+    });
+
+    subjectForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('subjectName').value;
+        const result = addSubject(name);
+        if (result.ok) {
+            subjectModal.classList.add('hidden');
+        } else {
+            subjectFormError.textContent = result.error;
+        }
+    });
+
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+
+    let pendingDeleteAction = null;
+
+    function askDeleteStudent(studentId, studentName) {
+        confirmTitle.textContent = 'Удалить ученика?';
+        confirmMessage.textContent = `Вы уверены, что хотите удалить «${studentName}»? Все данные о его долгах будут потеряны (но их можно будет вернуть в течение минуты).`;
+        pendingDeleteAction = () => deleteStudent(studentId);
+        confirmModal.classList.remove('hidden');
+    }
+
+    function askDeleteSubject(subjectId, subjectName) {
+        confirmTitle.textContent = 'Удалить предмет?';
+        confirmMessage.textContent = `Вы уверены, что хотите удалить столбец «${subjectName}»? Все долги по этому предмету будут удалены.`;
+        pendingDeleteAction = () => deleteSubject(subjectId, subjectName);
+        confirmModal.classList.remove('hidden');
+    }
+
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (pendingDeleteAction) {
+            pendingDeleteAction();
+            pendingDeleteAction = null;
+        }
+        confirmModal.classList.add('hidden');
+    });
+
+    cancelConfirmBtn.addEventListener('click', () => {
+        pendingDeleteAction = null;
+        confirmModal.classList.add('hidden');
+    });
+
+    [studentModal, subjectModal, confirmModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                pendingDeleteAction = null;
+            }
+        });
+    });
+
+    // ============================================================
+    //  АВТОРИЗАЦИЯ (+ пасхалка)
+    // ============================================================
+
+    const loginForm = document.getElementById('loginForm');
+    const loginInput = document.getElementById('loginInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const login = loginInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (login.toLowerCase() === EASTER_EGG.login && password === EASTER_EGG.password) {
+            loginError.textContent = '';
+            showEasterEgg();
+            return;
+        }
+
+        if (!login || !password) {
+            loginError.textContent = 'Введите логин и пароль';
+            return;
+        }
+
+        const user = users.find(u => u.login === login && u.password === password);
+
+        if (!user) {
+            loginError.textContent = 'Неверный логин или пароль';
+            return;
+        }
+
+        currentUser = user;
+        saveSession(user);
+        loginError.textContent = '';
+        showMainScreen();
+        showToast(`Добро пожаловать, ${user.name || user.login}!`);
+    });
+
+    // ============================================================
+    //  ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+    // ============================================================
+
+    function initApp() {
+        initTheme();
+        initStorage();
+
+        if (currentUser) {
+            showMainScreen();
+        } else {
+            showLoginScreen();
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            applyTheme(!document.body.classList.contains('dark'));
+        });
+
+        document.getElementById('restoreStudentBtn').addEventListener('click', () => {
+            restoreLastStudent();
+        });
+
+        document.getElementById('eggReturnBtn').addEventListener('click', hideEasterEgg);
+
+        document.getElementById('rageModeBtn').addEventListener('click', toggleRageMode);
+    }
+
+    initApp();
+</script>
+</body>
+</html>

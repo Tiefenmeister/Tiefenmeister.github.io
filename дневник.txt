@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дневник долгов</title>
+    <style>
+        /* ---------- Сброс и базовые стили ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: background 0.2s;
+        }
+
+        /* ---------- Утилиты ---------- */
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.1), 0 8px 12px -6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        /* ---------- Экран входа ---------- */
+        #loginScreen .card {
+            max-width: 420px;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            color: #0f172a;
+        }
+
+        .subhead {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: border 0.15s, box-shadow 0.15s;
+            background: #ffffff;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        button {
+            border: none;
+            border-radius: 40px;
+            padding: 0.85rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #ffffff;
+            color: #1e293b;
+            border: 1.5px solid #e2e8f0;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: 1.5px solid #3b82f6;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border-color: transparent;
+            color: #64748b;
+        }
+
+        .btn-ghost:hover {
+            background: #f1f5f9;
+        }
+
+        .btn-sm {
+            padding: 0.45rem 0.9rem;
+            font-size: 0.85rem;
+        }
+
+        .error-msg {
+            color: #dc2626;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            min-height: 1.3rem;
+        }
+
+        /* ---------- Основной экран ---------- */
+        #mainScreen {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            background: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .role-tag {
+            background: #e2e8f0;
+            color: #334155;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .table-wrapper {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            border: 1px solid #eef2f6;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 600px;
+            font-size: 0.95rem;
+            table-layout: auto;
+        }
+
+        th, td {
+            padding: 0.9rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eef2f6;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #0f172a;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            border-bottom: 1.5px solid #e2e8f0;
+            position: relative;
+        }
+
+        td {
+            color: #1e293b;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Ячейки с долгом — легкий красноватый фон */
+        td.debt-cell {
+            background: #fef2f2;
+            color: #991b1b;
+            font-weight: 500;
+        }
+
+        td.empty-cell {
+            color: #94a3b8;
+            background: #ffffff;
+        }
+
+        /* Inline-редактирование */
+        .edit-input {
+            width: 100%;
+            min-width: 120px;
+            padding: 0.4rem 0.6rem;
+            border: 1.5px solid #3b82f6;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            background: #ffffff;
+        }
+
+        /* Кнопки в ячейках */
+        .cell-actions {
+            display: flex;
+            gap: 0.25rem;
+            margin-left: 0.5rem;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            padding: 0.3rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #64748b;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        /* ---------- Модальные окна ---------- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.15s;
+        }
+
+        .modal-overlay.hidden {
+            display: none !important;
+        }
+
+        .modal {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 30px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal h2 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+        }
+
+        /* ---------- Тосты ---------- */
+        #toastContainer {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 2000;
+            align-items: flex-end;
+        }
+
+        .toast {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 0.8rem 1.4rem;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.25s ease;
+            max-width: 320px;
+            white-space: nowrap;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- Адаптив ---------- */
+        @media (max-width: 640px) {
+            .app-header {
+                border-radius: 24px;
+                padding: 1rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            th, td {
+                padding: 0.7rem 0.8rem;
+                font-size: 0.85rem;
+            }
+
+            .toast {
+                white-space: normal;
+                max-width: 260px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== ЭКРАН ВХОДА ========== -->
+<div id="loginScreen">
+    <div class="card">
+        <h1>Дневник долгов</h1>
+        <p class="subhead">Войдите, чтобы продолжить</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginInput">Логин</label>
+                <input type="text" id="loginInput" placeholder="Введите логин" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+                <label for="passwordInput">Пароль</label>
+                <input type="password" id="passwordInput" placeholder="Введите пароль" autocomplete="current-password" required>
+            </div>
+            <div id="loginError" class="error-msg"></div>
+            <button type="submit" class="btn-primary" style="width: 100%;">Войти</button>
+        </form>
+    </div>
+</div>
+
+<!-- ========== ОСНОВНОЙ ЭКРАН ========== -->
+<div id="mainScreen" class="hidden">
+    <div class="app-header">
+        <div class="user-badge">
+            <span class="user-name" id="headerUserName">—</span>
+            <span class="role-tag" id="headerUserRole">—</span>
+        </div>
+        <button id="logoutBtn" class="btn-ghost btn-sm">Выйти</button>
+    </div>
+
+    <div class="toolbar" id="adminToolbar">
+        <button id="addStudentBtn" class="btn-primary btn-sm">➕ Добавить ученика</button>
+        <button id="addSubjectBtn" class="btn-primary btn-sm">📚 Добавить предмет</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="debtTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ УЧЕНИКА ========== -->
+<div id="studentModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>Новый ученик</h2>
+        <form id="studentForm">
+            <div class="form-group">
+                <label>ФИО</label>
+                <input type="text" id="studentName" placeholder="Иванов Иван Иванович" required>
+            </div>
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" id="studentLogin" placeholder="ivanov2" required>
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="text" id="studentPassword" placeholder="1234" required>
+            </div>
+            <div id="studentFormError" class="error-msg"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="cancelStudentBtn">Отмена</button>
+                <button type="submit" class="btn-primary">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ДОБАВЛЕНИЕ ПРЕДМЕТА ========== -->
+<div id="subjectModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>Новый предмет</h2>
+        <form id="subjectForm">
+            <div class="form-group">
+                <label>Название предмета</label>
+                <input type="text" id="subjectName" placeholder="Например: Математика" required>
+            </div>
+            <div id="subjectFormError" class="error-msg"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-ghost" id="cancelSubjectBtn">Отмена</button>
+                <button type="submit" class="btn-primary">Добавить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== МОДАЛЬНОЕ ОКНО: ПОДТВЕРЖДЕНИЕ УДАЛЕНИЯ ========== -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2 id="confirmTitle">Подтверждение</h2>
+        <p id="confirmMessage" style="color: #475569; margin-bottom: 0.5rem;">Вы уверены?</p>
+        <div class="modal-actions">
+            <button type="button" class="btn-ghost" id="cancelConfirmBtn">Отмена</button>
+            <button type="button" class="btn-danger" id="confirmDeleteBtn">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== ТОСТЫ ========== -->
+<div id="toastContainer"></div>
+
+<script>
+    // ============================================================
+    //  ДНЕВНИК ДОЛГОВ — Vanilla JS
+    // ============================================================
+
+    // ---------- Ключи localStorage ----------
+    const LS_KEYS = {
+        USERS: 'debt_users',
+        SUBJECTS: 'debt_subjects',
+        DATA: 'debt_data',
+        SESSION: 'debt_session'
+    };
+
+    // ---------- Демо-данные (при первом запуске) ----------
+    const DEFAULT_USERS = [
+        { id: 'u1', login: 'admin', password: 'admin123', role: 'admin', name: 'Администратор' },
+        { id: 'u2', login: 'ivanov', password: '1234', role: 'student', name: 'Иванов Иван Иванович' },
+        { id: 'u3', login: 'petrov', password: '1234', role: 'student', name: 'Петров Пётр Петрович' },
+        { id: 'u4', login: 'sidorova', password: '1234', role: 'student', name: 'Сидорова Анна Сергеевна' },
+        { id: 'u5', login: 'kuznetsov', password: '1234', role: 'student', name: 'Кузнецов Дмитрий Олегович' }
+    ];
+
+    const DEFAULT_SUBJECTS = [
+        { id: 's1', name: 'Математика' },
+        { id: 's2', name: 'Физика' },
+        { id: 's3', name: 'Информатика' },
+        { id: 's4', name: 'История' }
+    ];
+
+    // Ключи: id ученика -> id предмета -> текст долга
+    const DEFAULT_DATA = {
+        'u2': { 's1': '2 курс 2 семестр', 's3': '1 курс 1 семестр' },
+        'u3': { 's2': '3 курс 1 семестр', 's4': '2 курс 2 семестр' },
+        'u4': { 's1': '1 курс 1 семестр' },
+        'u5': { 's2': '2 курс 2 семестр', 's3': '3 курс 1 семестр', 's4': '1 курс 2 семестр' }
+    };
+
+    // ---------- Хранилище ----------
+    let users = [];
+    let subjects = [];
+    let debtData = {};       // { studentId: { subjectId: text } }
+    let currentUser = null;  // объект пользователя или null
+
+    // ---------- Вспомогательные функции ----------
+    function loadFromLS(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {
+            console.warn('Ошибка чтения localStorage', e);
+        }
+        return fallback;
+    }
+
+    function saveToLS(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.warn('Ошибка записи в localStorage', e);
+        }
+    }
+
+    // Генерация id
+    function genId(prefix = 'id') {
+        return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // Toast-уведомление
+    function showToast(message) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.2s';
+            setTimeout(() => toast.remove(), 250);
+        }, 2600);
+    }
+
+    // ---------- Инициализация данных ----------
+    function initStorage() {
+        // Пользователи
+        if (!localStorage.getItem(LS_KEYS.USERS)) {
+            saveToLS(LS_KEYS.USERS, DEFAULT_USERS);
+        }
+        users = loadFromLS(LS_KEYS.USERS, DEFAULT_USERS);
+
+        // Предметы
+        if (!localStorage.getItem(LS_KEYS.SUBJECTS)) {
+            saveToLS(LS_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+        }
+        subjects = loadFromLS(LS_KEYS.SUBJECTS, DEFAULT_SUBJECTS);
+
+        // Данные таблицы
+        if (!localStorage.getItem(LS_KEYS.DATA)) {
+            saveToLS(LS_KEYS.DATA, DEFAULT_DATA);
+        }
+        debtData = loadFromLS(LS_KEYS.DATA, DEFAULT_DATA);
+
+        // Сессия
+        const sessionRaw = localStorage.getItem(LS_KEYS.SESSION);
+        if (sessionRaw) {
+            try {
+                const session = JSON.parse(sessionRaw);
+                if (session && session.userId) {
+                    const user = users.find(u => u.id === session.userId);
+                    if (user) currentUser = user;
+                }
+            } catch (e) { /* ignore */ }
+        }
+    }
+
+    // ---------- Сохранение отдельных частей ----------
+    function saveUsers() { saveToLS(LS_KEYS.USERS, users); }
+    function saveSubjects() { saveToLS(LS_KEYS.SUBJECTS, subjects); }
+    function saveData() { saveToLS(LS_KEYS.DATA, debtData); }
+
+    // ---------- Работа с сессией ----------
+    function saveSession(user) {
+        if (user) {
+            saveToLS(LS_KEYS.SESSION, { userId: user.id });
+        } else {
+            localStorage.removeItem(LS_KEYS.SESSION);
+        }
+    }
+
+    // ---------- Показать/скрыть экраны ----------
+    function showLoginScreen() {
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainScreen').classList.add('hidden');
+        // Сброс полей
+        document.getElementById('loginInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('loginError').textContent = '';
+    }
+
+    function showMainScreen() {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainScreen').classList.remove('hidden');
+        // Обновить шапку
+        document.getElementById('headerUserName').textContent = currentUser.name || currentUser.login;
+        document.getElementById('headerUserRole').textContent = currentUser.role === 'admin' ? 'Администратор' : 'Ученик';
+        // Панель инструментов — только для админа
+        const toolbar = document.getElementById('adminToolbar');
+        if (currentUser.role === 'admin') {
+            toolbar.classList.remove('hidden');
+        } else {
+            toolbar.classList.add('hidden');
+        }
+        renderTable();
+    }
+
+    // ---------- Выход ----------
+    function logout() {
+        currentUser = null;
+        saveSession(null);
+        showLoginScreen();
+        showToast('Вы вышли из системы');
+    }
+
+    // ============================================================
+    //  РЕНДЕРИНГ ТАБЛИЦЫ
+    // ============================================================
+
+    function renderTable() {
+        if (!currentUser) return;
+
+        const thead = document.getElementById('tableHead');
+        const tbody = document.getElementById('tableBody');
+        const isAdmin = currentUser.role === 'admin';
+
+        // --- Заголовок ---
+        thead.innerHTML = '';
+
+        // Первый столбец "Ученик"
+        const headRow = document.createElement('tr');
+        const thStudent = document.createElement('th');
+        thStudent.textContent = 'Ученик';
+        thStudent.style.minWidth = '180px';
+        headRow.appendChild(thStudent);
+
+        // Столбцы предметов
+        subjects.forEach(subject => {
+            const th = document.createElement('th');
+            th.style.minWidth = '150px';
+
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.alignItems = 'center';
+            container.style.justifyContent = 'space-between';
+            container.style.gap = '0.5rem';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = subject.name;
+            container.appendChild(nameSpan);
+
+            if (isAdmin) {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon-btn';
+                delBtn.innerHTML = '✕';
+                delBtn.title = 'Удалить предмет';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    askDeleteSubject(subject.id, subject.name);
+                });
+                container.appendChild(delBtn);
+            }
+
+            th.appendChild(container);
+            headRow.appendChild(th);
+        });
+
+        // Столбец действий (только для админа) — для удаления строк
+        if (isAdmin) {
+            const thActions = document.createElement('th');
+            thActions.textContent = '⚙️';
+            thActions.style.minWidth = '60px';
+            thActions.style.textAlign = 'center';
+            headRow.appendChild(thActions);
+        }
+
+        thead.appendChild(headRow);
+
+        // --- Тело таблицы ---
+        tbody.innerHTML = '';
+
+        // Фильтрация: ученик видит только свою строку
+        let visibleUsers = users.filter(u => u.role === 'student');
+        if (!isAdmin) {
+            // Только текущий ученик
+            visibleUsers = visibleUsers.filter(u => u.id === currentUser.id);
+        }
+
+        if (visibleUsers.length === 0) {
+            // Ничего не показываем, но можно добавить сообщение
+            const emptyRow = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = subjects.length + 1 + (isAdmin ? 1 : 0);
+            td.textContent = 'Нет учеников для отображения';
+            td.style.textAlign = 'center';
+            td.style.color = '#94a3b8';
+            emptyRow.appendChild(td);
+            tbody.appendChild(emptyRow);
+        }
+
+        visibleUsers.forEach(user => {
+            const row = document.createElement('tr');
+
+            // Ячейка с ФИО
+            const nameTd = document.createElement('td');
+            nameTd.textContent = user.name;
+            nameTd.style.fontWeight = '500';
+            row.appendChild(nameTd);
+
+            // Ячейки по предметам
+            subjects.forEach(subject => {
+                const td = document.createElement('td');
+                const value = (debtData[user.id] && debtData[user.id][subject.id]) || '';
+
+                if (isAdmin) {
+                    // Админ может редактировать ячейку по двойному клику
+                    td.style.cursor = 'pointer';
+                    td.title = 'Двойной клик для редактирования';
+
+                    const span = document.createElement('span');
+                    span.textContent = value || '—';
+                    td.appendChild(span);
+
+                    // Классы для подсветки
+                    if (value) {
+                        td.classList.add('debt-cell');
+                    } else {
+                        td.classList.add('empty-cell');
+                    }
+
+                    // Двойной клик — inline-редактирование
+                    td.addEventListener('dblclick', () => startInlineEdit(td, user.id, subject.id, value));
+
+                    row.appendChild(td);
+                } else {
+                    // Ученик — только чтение
+                    td.textContent = value || '—';
+                    if (value) {
+                        td.classList.add('debt-cell');
+                    } else {
+                        td.classList.add('empty-cell');
+                    }
+                    row.appendChild(td);
+                }
+            });
+
+            // Столбец действий (удаление строки) — только админ
+            if (isAdmin) {
+                const actionsTd = document.createElement('td');
+                actionsTd.style.textAlign = 'center';
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'icon-btn';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = 'Удалить ученика';
+                delBtn.addEventListener('click', () => askDeleteStudent(user.id, user.name));
+                actionsTd.appendChild(delBtn);
+
+                row.appendChild(actionsTd);
+            }
+
+            tbody.appendChild(row);
+        });
+    }
+
+    // ---------- Inline-редактирование ячейки ----------
+    function startInlineEdit(td, studentId, subjectId, currentValue) {
+        // Не даём открыть два редактора одновременно
+        if (td.querySelector('input')) return;
+
+        const originalHTML = td.innerHTML;
+        td.innerHTML = '';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-input';
+        input.value = currentValue;
+        input.placeholder = 'Нет долга';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'icon-btn';
+        saveBtn.innerHTML = '✔️';
+        saveBtn.title = 'Сохранить';
+        saveBtn.style.marginLeft = '0.25rem';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'icon-btn';
+        cancelBtn.innerHTML = '✖️';
+        cancelBtn.title = 'Отмена';
+        cancelBtn.style.marginLeft = '0.1rem';
+
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.appendChild(input);
+        wrapper.appendChild(saveBtn);
+        wrapper.appendChild(cancelBtn);
+        td.appendChild(wrapper);
+
+        input.focus();
+        input.select();
+
+        function save() {
+            const newValue = input.value.trim();
+            if (!debtData[studentId]) debtData[studentId] = {};
+            if (newValue) {
+                debtData[studentId][subjectId] = newValue;
+            } else {
+                delete debtData[studentId][subjectId];
+                // Если у ученика больше нет долгов — удаляем пустой объект
+                if (Object.keys(debtData[studentId]).length === 0) {
+                    delete debtData[studentId];
+                }
+            }
+            saveData();
+            renderTable();
+            showToast('Сохранено');
+        }
+
+        function cancel() {
+            td.innerHTML = originalHTML;
+            // Восстановить классы (на случай, если они были сброшены)
+            // Проще перерисовать всю таблицу, но можно вручную:
+            // Лучше перерисовать — надёжнее.
+            renderTable();
+        }
+
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            save();
+        });
+
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            cancel();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                save();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancel();
+            }
+        });
+
+        // Клик вне — отмена
+        const clickOutside = (e) => {
+            if (!td.contains(e.target)) {
+                cancel();
+                document.removeEventListener('click', clickOutside);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', clickOutside), 0);
+    }
+
+    // ============================================================
+    //  CRUD: УЧЕНИКИ
+    // ============================================================
+
+    function addStudent(name, login, password) {
+        // Валидация
+        if (!name.trim() || !login.trim() || !password.trim()) {
+            return { ok: false, error: 'Заполните все поля' };
+        }
+
+        // Уникальность логина
+        if (users.some(u => u.login.toLowerCase() === login.trim().toLowerCase())) {
+            return { ok: false, error: 'Пользователь с таким логином уже существует' };
+        }
+
+        const newUser = {
+            id: genId('u'),
+            login: login.trim(),
+            password: password.trim(),
+            role: 'student',
+            name: name.trim()
+        };
+
+        users.push(newUser);
+        saveUsers();
+
+        // Инициализируем пустую запись в данных (чтобы ученик отображался)
+        if (!debtData[newUser.id]) {
+            debtData[newUser.id] = {};
+            saveData();
+        }
+
+        showToast('Ученик добавлен');
+        renderTable();
+        return { ok: true };
+    }
+
+    function deleteStudent(studentId) {
+        // Удаляем пользователя
+        users = users.filter(u => u.id !== studentId);
+        saveUsers();
+
+        // Удаляем его данные из таблицы
+        delete debtData[studentId];
+        saveData();
+
+        // Если удалили себя (админ не может удалить себя — проверим)
+        if (currentUser && currentUser.id === studentId) {
+            logout();
+        }
+
+        showToast('Ученик удалён');
+        renderTable();
+    }
+
+    // ============================================================
+    //  CRUD: ПРЕДМЕТЫ
+    // ============================================================
+
+    function addSubject(name) {
+        if (!name.trim()) {
+            return { ok: false, error: 'Введите название предмета' };
+        }
+
+        // Проверка на дубликат (не строго, но желательно)
+        if (subjects.some(s => s.name.toLowerCase() === name.trim().toLowerCase())) {
+            return { ok: false, error: 'Такой предмет уже существует' };
+        }
+
+        const newSubject = {
+            id: genId('s'),
+            name: name.trim()
+        };
+
+        subjects.push(newSubject);
+        saveSubjects();
+
+        showToast('Столбец добавлен');
+        renderTable();
+        return { ok: true };
+    }
+
+    function deleteSubject(subjectId, subjectName) {
+        // Удаляем предмет
+        subjects = subjects.filter(s => s.id !== subjectId);
+        saveSubjects();
+
+        // Удаляем все ячейки с этим предметом
+        for (const studentId in debtData) {
+            if (debtData[studentId] && debtData[studentId][subjectId]) {
+                delete debtData[studentId][subjectId];
+                // Если у ученика не осталось долгов — удаляем пустой объект
+                if (Object.keys(debtData[studentId]).length === 0) {
+                    delete debtData[studentId];
+                }
+            }
+        }
+        saveData();
+
+        showToast(`Предмет «${subjectName}» удалён`);
+        renderTable();
+    }
+
+    // ============================================================
+    //  МОДАЛЬНЫЕ ОКНА И ПОДТВЕРЖДЕНИЯ
+    // ============================================================
+
+    // --- Модалка ученика ---
+    const studentModal = document.getElementById('studentModal');
+    const studentForm = document.getElementById('studentForm');
+    const studentFormError = document.getElementById('studentFormError');
+
+    document.getElementById('addStudentBtn').addEventListener('click', () => {
+        studentForm.reset();
+        studentFormError.textContent = '';
+        studentModal.classList.remove('hidden');
+        document.getElementById('studentName').focus();
+    });
+
+    document.getElementById('cancelStudentBtn').addEventListener('click', () => {
+        studentModal.classList.add('hidden');
+    });
+
+    studentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('studentName').value;
+        const login = document.getElementById('studentLogin').value;
+        const password = document.getElementById('studentPassword').value;
+
+        const result = addStudent(name, login, password);
+        if (result.ok) {
+            studentModal.classList.add('hidden');
+        } else {
+            studentFormError.textContent = result.error;
+        }
+    });
+
+    // --- Модалка предмета ---
+    const subjectModal = document.getElementById('subjectModal');
+    const subjectForm = document.getElementById('subjectForm');
+    const subjectFormError = document.getElementById('subjectFormError');
+
+    document.getElementById('addSubjectBtn').addEventListener('click', () => {
+        subjectForm.reset();
+        subjectFormError.textContent = '';
+        subjectModal.classList.remove('hidden');
+        document.getElementById('subjectName').focus();
+    });
+
+    document.getElementById('cancelSubjectBtn').addEventListener('click', () => {
+        subjectModal.classList.add('hidden');
+    });
+
+    subjectForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('subjectName').value;
+        const result = addSubject(name);
+        if (result.ok) {
+            subjectModal.classList.add('hidden');
+        } else {
+            subjectFormError.textContent = result.error;
+        }
+    });
+
+    // --- Модалка подтверждения удаления ---
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelConfirmBtn = document.getElementById('cancelConfirmBtn');
+
+    let pendingDeleteAction = null;
+
+    function askDeleteStudent(studentId, studentName) {
+        confirmTitle.textContent = 'Удалить ученика?';
+        confirmMessage.textContent = `Вы уверены, что хотите удалить «${studentName}»? Все данные о его долгах будут потеряны.`;
+        pendingDeleteAction = () => deleteStudent(studentId);
+        confirmModal.classList.remove('hidden');
+    }
+
+    function askDeleteSubject(subjectId, subjectName) {
+        confirmTitle.textContent = 'Удалить предмет?';
+        confirmMessage.textContent = `Вы уверены, что хотите удалить столбец «${subjectName}»? Все долги по этому предмету будут удалены.`;
+        pendingDeleteAction = () => deleteSubject(subjectId, subjectName);
+        confirmModal.classList.remove('hidden');
+    }
+
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (pendingDeleteAction) {
+            pendingDeleteAction();
+            pendingDeleteAction = null;
+        }
+        confirmModal.classList.add('hidden');
+    });
+
+    cancelConfirmBtn.addEventListener('click', () => {
+        pendingDeleteAction = null;
+        confirmModal.classList.add('hidden');
+    });
+
+    // Закрытие модалок по клику на оверлей
+    [studentModal, subjectModal, confirmModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                pendingDeleteAction = null;
+            }
+        });
+    });
+
+    // ============================================================
+    //  АВТОРИЗАЦИЯ
+    // ============================================================
+
+    const loginForm = document.getElementById('loginForm');
+    const loginInput = document.getElementById('loginInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const login = loginInput.value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!login || !password) {
+            loginError.textContent = 'Введите логин и пароль';
+            return;
+        }
+
+        const user = users.find(u => u.login === login && u.password === password);
+
+        if (!user) {
+            loginError.textContent = 'Неверный логин или пароль';
+            return;
+        }
+
+        // Успешный вход
+        currentUser = user;
+        saveSession(user);
+        loginError.textContent = '';
+        showMainScreen();
+        showToast(`Добро пожаловать, ${user.name || user.login}!`);
+    });
+
+    // ============================================================
+    //  ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+    // ============================================================
+
+    function initApp() {
+        initStorage();
+
+        if (currentUser) {
+            // Сессия активна — показываем основной экран
+            showMainScreen();
+        } else {
+            showLoginScreen();
+        }
+
+        // Кнопка "Выйти"
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+    }
+
+    // Запуск
+    initApp();
+</script>
+</body>
+</html>
